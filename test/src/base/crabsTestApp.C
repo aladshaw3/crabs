@@ -1,0 +1,62 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+#include "crabsTestApp.h"
+#include "crabsApp.h"
+#include "Moose.h"
+#include "AppFactory.h"
+#include "MooseSyntax.h"
+#include "ModulesApp.h"
+
+InputParameters
+crabsTestApp::validParams()
+{
+  InputParameters params = crabsApp::validParams();
+  return params;
+}
+
+crabsTestApp::crabsTestApp(InputParameters parameters) : MooseApp(parameters)
+{
+  crabsTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
+}
+
+crabsTestApp::~crabsTestApp() {}
+
+void
+crabsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+{
+  crabsApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"crabsTestApp"});
+    Registry::registerActionsTo(af, {"crabsTestApp"});
+  }
+}
+
+void
+crabsTestApp::registerApps()
+{
+  registerApp(crabsApp);
+  registerApp(crabsTestApp);
+}
+
+/***************************************************************************************************
+ *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
+ **************************************************************************************************/
+// External entry point for dynamic application loading
+extern "C" void
+crabsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  crabsTestApp::registerAll(f, af, s);
+}
+extern "C" void
+crabsTestApp__registerApps()
+{
+  crabsTestApp::registerApps();
+}
