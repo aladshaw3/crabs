@@ -1,10 +1,10 @@
 /*!
- *  \file GAdvection.h
- *	\brief Kernel for use with the corresponding DGAdvection object
- *	\details This file creates a standard MOOSE kernel that is to be used in conjunction with the DGAdvection kernel
+ *  \file GAnisotropicDiffusion.h
+ *	\brief Kernel for use with the corresponding DGAnisotropicDiffusion object
+ *	\details This file creates a standard MOOSE kernel that is to be used in conjunction with the DGAnisotropicDiffusion kernel
  *			for the discontinous Galerkin formulation of advection physics in MOOSE. In order to complete the DG
  *			formulation of the advective physics, this kernel must be utilized with every variable that also uses
- *			the DGAdvection kernel.
+ *			the DGAAnisotropicDiffusion kernel.
  *
  *      Reference: B. Riviere, Discontinous Galerkin methods for solving elliptic and parabolic equations:
  *                    Theory and Implementation, SIAM, Houston, TX, 2008.
@@ -38,43 +38,62 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "GAdvection.h"
+#include "GAnisotropicDiffusion.h"
 
 /**
  * All MOOSE based object classes you create must be registered using this macro.  The first
  * argument is the name of the App with an "App" suffix (i.e., "fennecApp"). The second
  * argument is the name of the C++ class you created.
  */
-registerMooseObject("crabsApp", GAdvection);
+registerMooseObject("crabsApp", GAnisotropicDiffusion);
 
 template<>
-InputParameters validParams<GAdvection>()
+InputParameters validParams<GAnisotropicDiffusion>()
 {
 	InputParameters params = validParams<Kernel>();
-	params.addParam<Real>("vx",0, "x-component of velocity vector");
-	params.addParam<Real>("vy",0,"y-component of velocity vector");
-	params.addParam<Real>("vz",0,"z-component of velocity vector");
+	params.addParam<Real>("Dxx",0,"xx-component of diffusion tensor");
+	params.addParam<Real>("Dxy",0,"xy-component of diffusion tensor");
+	params.addParam<Real>("Dxz",0,"xz-component of diffusion tensor");
+	params.addParam<Real>("Dyx",0,"yx-component of diffusion tensor");
+	params.addParam<Real>("Dyy",0,"yy-component of diffusion tensor");
+	params.addParam<Real>("Dyz",0,"yz-component of diffusion tensor");
+	params.addParam<Real>("Dzx",0,"zx-component of diffusion tensor");
+	params.addParam<Real>("Dzy",0,"zy-component of diffusion tensor");
+	params.addParam<Real>("Dzz",0,"zz-component of diffusion tensor");
 	return params;
 }
 
-GAdvection::GAdvection(const InputParameters & parameters) :
+GAnisotropicDiffusion::GAnisotropicDiffusion(const InputParameters & parameters) :
 Kernel(parameters),
-_vx(getParam<Real>("vx")),
-_vy(getParam<Real>("vy")),
-_vz(getParam<Real>("vz"))
-
+_Dxx(getParam<Real>("Dxx")),
+_Dxy(getParam<Real>("Dxy")),
+_Dxz(getParam<Real>("Dxz")),
+_Dyx(getParam<Real>("Dyx")),
+_Dyy(getParam<Real>("Dyy")),
+_Dyz(getParam<Real>("Dyz")),
+_Dzx(getParam<Real>("Dzx")),
+_Dzy(getParam<Real>("Dzy")),
+_Dzz(getParam<Real>("Dzz"))
 {
-	_velocity(0)=_vx;
-	_velocity(1)=_vy;
-	_velocity(2)=_vz;
+	_Diffusion(0,0) = _Dxx;
+	_Diffusion(0,1) = _Dxy;
+	_Diffusion(0,2) = _Dxz;
+
+	_Diffusion(1,0) = _Dyx;
+	_Diffusion(1,1) = _Dyy;
+	_Diffusion(1,2) = _Dyz;
+
+	_Diffusion(2,0) = _Dzx;
+	_Diffusion(2,1) = _Dzy;
+	_Diffusion(2,2) = _Dzz;
 }
 
-Real GAdvection::computeQpResidual()
+Real GAnisotropicDiffusion::computeQpResidual()
 {
-	return -_u[_qp]*(_velocity*_grad_test[_i][_qp]);
+	return _Diffusion*_grad_test[_i][_qp]*_grad_u[_qp];
 }
 
-Real GAdvection::computeQpJacobian()
+Real GAnisotropicDiffusion::computeQpJacobian()
 {
-	return -_phi[_j][_qp]*(_velocity*_grad_test[_i][_qp]);
+	return _Diffusion*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
 }

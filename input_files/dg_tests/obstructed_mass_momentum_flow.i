@@ -42,7 +42,7 @@
 
 [Variables]
   [./conc]
-    order = SECOND       #Needs slope limiting stabilization (should be an example in MOOSE modules)
+    order = FIRST       #Needs slope limiting stabilization (should be an example in MOOSE modules)
     #order = CONSTANT
     family = MONOMIAL
     initial_condition = 0.0

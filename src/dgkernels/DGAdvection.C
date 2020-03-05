@@ -1,6 +1,20 @@
 /*!
  *  \file DGAdvection.h
  *	\brief Discontinous Galerkin kernel for advection
+ *	\details This file creates a discontinous Galerkin kernel for advection physics in a given domain. It is a generic
+ *			advection kernel that is meant to be inherited from to make a more specific kernel for a given problem. The
+ *			physical parameter in this kernel's formulation is a velocity vector. That vector can be built piecewise by
+ *			the respective x, y, and z components of a velocity field at a given quadrature point.
+ *
+ *      Reference: B. Riviere, Discontinous Galerkin methods for solving elliptic and parabolic equations:
+ *                    Theory and Implementation, SIAM, Houston, TX, 2008.
+ *
+ *	\note Any DG kernel under DGOSPREY will have a cooresponding G kernel (usually of same name) that must be included
+ *		with the DG kernel in the input file. This is because the DG finite element method breaks into several different
+ *		residual pieces, only a handful of which are handled by the DG kernel system and the other parts must be handled
+ *		by the standard Galerkin system. This my be due to some legacy code in MOOSE. I am not sure if it is possible to
+ *		lump all of these actions into a single DG kernel.
+ *
  *  \author Austin Ladshaw
  *	\date 11/20/2015
  *	\copyright This kernel was designed and built at the Georgia Institute

@@ -8,6 +8,10 @@
  *			the sign of the flux normal to the boundary and determine automattically whether it is
  *			an output or input boundary, then apply the appropriate conditions.
  *
+ *      Reference: B. Riviere, Discontinous Galerkin methods for solving elliptic and parabolic equations:
+ *                    Theory and Implementation, SIAM, Houston, TX, 2008.
+ *
+ *
  *  \author Austin Ladshaw
  *	\date 07/12/2018
  *	\copyright This kernel was designed and built at the Georgia Institute

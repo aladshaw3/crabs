@@ -6,6 +6,9 @@
  *			formulation of the advective physics, this kernel must be utilized with every variable that also uses
  *			the DGAdvection kernel.
  *
+ *      Reference: B. Riviere, Discontinous Galerkin methods for solving elliptic and parabolic equations:
+ *                    Theory and Implementation, SIAM, Houston, TX, 2008.
+ *
  *  \author Austin Ladshaw
  *	\date 11/20/2015
  *	\copyright This kernel was designed and built at the Georgia Institute

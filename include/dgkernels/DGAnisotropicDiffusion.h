@@ -1,10 +1,28 @@
 /*!
- *  \file DGAdvection.h
- *	\brief Discontinous Galerkin kernel for advection
- *	\details This file creates a discontinous Galerkin kernel for advection physics in a given domain. It is a generic
- *			advection kernel that is meant to be inherited from to make a more specific kernel for a given problem. The
- *			physical parameter in this kernel's formulation is a velocity vector. That vector can be built piecewise by
- *			the respective x, y, and z components of a velocity field at a given quadrature point.
+ *  \file DGAnisotropicDiffusion.h
+ *	\brief Discontinous Galerkin kernel for anisotropic diffusion
+ *	\details This file creates a discontinous Galerkin kernel for anisotropic diffusion in a given domain. It is a generic
+ *			diffusion kernel that is meant to be inherited from to make a more specific kernel for a given problem. The
+ *			physical parameter in this kernel's formulation is a diffusion tensor. That tensor can be built piecewise by
+ *			the respective components of the tensor at a given quadrature point.
+ *
+ *      The DG method for diffusion involves 2 correction parameters:
+ *
+ *          (1) sigma - penalty term that should be >= 0 [if too large, it may cause errors]
+ *          (2) epsilon - integer term with values of either -1, 0, or 1
+ *
+ *      Different values for epsilon result in slightly different discretizations:
+ *
+ *          (1) epsilon = -1   ==>   Symmetric Interior Penalty Galerkin (SIPG)
+ *                                   Very efficient for symmetric problems, but may only
+ *                                   converge if sigma is high.
+ *          (2) epsilon = 0    ==>   Incomplete Interior Penalty Galerkin (IIPG)
+ *                                   Works well for non-symmetic, well posed problems, but
+ *                                   only converges under same sigma values as SIPG.
+ *          (3) epsilon = 1    ==>   Non-symmetric Interior Penalty Galerking (NIPG)
+ *                                   Most stable and easily convergable method that can
+ *                                   work for symmetic and non-symmetric systems. Much
+ *                                   less dependent on sigma values for convergence.
  *
  *      Reference: B. Riviere, Discontinous Galerkin methods for solving elliptic and parabolic equations:
  *                    Theory and Implementation, SIAM, Houston, TX, 2008.
@@ -47,29 +65,30 @@
 #pragma once
 
 #include "DGKernel.h"
+#include "MooseVariable.h"
 #include <cmath>
 
-/// DGAdvection class object forward declarations
-class DGAdvection;
+/// DGAnisotropicDiffusion class object forward declarations
+class DGAnisotropicDiffusion;
 
 template<>
-InputParameters validParams<DGAdvection>();
+InputParameters validParams<DGAnisotropicDiffusion>();
 
-/// DGAdvection class object inherits from DGKernel object
+/// DGAnisotropicDiffusion class object inherits from DGKernel object
 /** This class object inherits from the DGKernel object in the MOOSE framework.
 	All public and protected members of this class are required function overrides. The object
 	will provide residuals and Jacobians for the discontinous Galerkin formulation of advection
-	physics in the MOOSE framework. The only parameter for this kernel is a generic velocity
-	vector, whose components can be set piecewise in the input file or by inheriting from this
-	base class and manually altering the velocity vector.
+	physics in the MOOSE framework. The only parameter for this kernel is a diffusion tensor,
+	whose components can be set piecewise in the input file or by inheriting from this base class
+	and manually altering the tensor matrix.
 
 	\note As a reminder, any DGKernel in MOOSE was be accompanied by the equivalent GKernel in
 	order to provide the full residuals and Jacobians for the system. */
-class DGAdvection : public DGKernel
+class DGAnisotropicDiffusion : public DGKernel
 {
 public:
 	/// Required constructor for objects in MOOSE
-	DGAdvection(const InputParameters & parameters);
+	DGAnisotropicDiffusion(const InputParameters & parameters);
 
 protected:
 	/// Required residual function for DG kernels in MOOSE
@@ -81,10 +100,14 @@ protected:
 		system and is used in preconditioning of the linear sub-problem. */
 	virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
-	RealVectorValue _velocity;			///< Vector of velocity
-	Real _vx;							///< x-component of velocity (optional - set in input file)
-	Real _vy;							///< y-component of velocity (optional - set in input file)
-	Real _vz;							///< z-component of velocity (optional - set in input file)
+  MooseEnum _dg_scheme;					///< Enumerator to determine what scheme to use (NIPG, IIPG, or SIPG)
+	Real _epsilon;									///< Penalty term for gradient jumps between the solution and test functions
+	Real _sigma;										///< Penalty term applied to element size
+	RealTensorValue _Diffusion;			///< Diffusion tensor matrix parameter
+
+	Real _Dxx, _Dxy, _Dxz;
+	Real _Dyx, _Dyy, _Dyz;
+	Real _Dzx, _Dzy, _Dzz;
 
 private:
 

@@ -1,20 +1,13 @@
 /*!
- *  \file DGFluxBC.h
- *	\brief Boundary Condition kernel for the flux across a boundary of the domain
- *	\details This file creates a generic boundary condition kernel for the flux of material accross
- *			a boundary. The flux is based on a velocity vector and is valid
- *			in all directions and all boundaries of a DG method. Since the DG method's flux boundary
- *			conditions are essitially the same for input and ouput boundaries, this kernel will check
- *			the sign of the flux normal to the boundary and determine automattically whether it is
- *			an output or input boundary, then apply the appropriate conditions.
- *
- *			This type of boundary condition for DG kernels applies the true flux boundary condition.
- *			In true finite volumes or DG methods, there is no Dirichlet	boundary conditions,
- *			because the solutions are based on fluxes into and out of cells in a domain.
+ *  \file GAnisotropicDiffusion.h
+ *	\brief Kernel for use with the corresponding DGAnisotropicDiffusion object
+ *	\details This file creates a standard MOOSE kernel that is to be used in conjunction with the DGAnisotropicDiffusion kernel
+ *			for the discontinous Galerkin formulation of advection physics in MOOSE. In order to complete the DG
+ *			formulation of the advective physics, this kernel must be utilized with every variable that also uses
+ *			the DGAAnisotropicDiffusion kernel.
  *
  *      Reference: B. Riviere, Discontinous Galerkin methods for solving elliptic and parabolic equations:
  *                    Theory and Implementation, SIAM, Houston, TX, 2008.
- *
  *
  *  \author Austin Ladshaw
  *	\date 11/20/2015
@@ -47,45 +40,44 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
-#include "libmesh/vector_value.h"
+#include "Kernel.h"
 
-/// DGFluxBC class object forward declaration
-class DGFluxBC;
+/// GAnisotropicDiffusion class object forward declarations
+class GAnisotropicDiffusion;
 
 template<>
-InputParameters validParams<DGFluxBC>();
+InputParameters validParams<GAnisotropicDiffusion>();
 
-/// DGFluxBC class object inherits from IntegratedBC object
-/** This class object inherits from the IntegratedBC object.
+/// GAnisotropicDiffusion class object inherits from Kernel object
+/** This class object inherits from the Kernel object in the MOOSE framework.
 	All public and protected members of this class are required function overrides.
-	The flux BC uses the velocity in the system to apply a boundary
-	condition based on whether or not material is leaving or entering the boundary. */
-class DGFluxBC : public IntegratedBC
+	The kernel has a diffusion tensor whose components can be set piecewise in an
+	input file.
+
+	\note To create a specific GAnisotropicDiffusion kernel, inherit from this class and override
+	the components of the diffusion tensor, then call the residual and Jacobian functions
+	for this object. */
+class GAnisotropicDiffusion : public Kernel
 {
 public:
-	/// Required constructor for BC objects in MOOSE
-	DGFluxBC(const InputParameters & parameters);
+	/// Required constructor for objects in MOOSE
+	GAnisotropicDiffusion(const InputParameters & parameters);
 
 protected:
-	/// Required function override for BC objects in MOOSE
+	/// Required residual function for standard kernels in MOOSE
 	/** This function returns a residual contribution for this object.*/
 	virtual Real computeQpResidual() override;
-	/// Required function override for BC objects in MOOSE
+	/// Required Jacobian function for standard kernels in MOOSE
 	/** This function returns a Jacobian contribution for this object. The Jacobian being
 		computed is the associated diagonal element in the overall Jacobian matrix for the
 		system and is used in preconditioning of the linear sub-problem. */
 	virtual Real computeQpJacobian() override;
 
-	/// Velocity vector in the system or at the boundary
-	RealVectorValue _velocity;
+	RealTensorValue _Diffusion;			///< Diffusion tensor matrix parameter
 
-	Real _vx;
-	Real _vy;
-	Real _vz;
-
-	/// Value of the non-linear variable at the input of the boundary
-	Real _u_input;
+	Real _Dxx, _Dxy, _Dxz;
+	Real _Dyx, _Dyy, _Dyz;
+	Real _Dzx, _Dzy, _Dzz;
 
 private:
 

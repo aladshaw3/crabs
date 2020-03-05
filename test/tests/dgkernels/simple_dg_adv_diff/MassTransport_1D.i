@@ -62,7 +62,6 @@
 		    uy = uy
 		    uz = uz
     [../]
-    #Seems like this kernel is optional for added stability
     [./u_gdiff]
       type = GAnisotropicDiffusion
       variable = dens
@@ -81,8 +80,6 @@
     [./u_dgdiff]
         type = DGAnisotropicDiffusion
         variable = dens
-        dg_scheme = 'nipg'   #options: 'nipg', 'sipg', 'iipg'
-        sigma = 1
     [../]
 
 [] #END DGKernels

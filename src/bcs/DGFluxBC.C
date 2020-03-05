@@ -1,6 +1,21 @@
 /*!
  *  \file DGFluxBC.h
  *	\brief Boundary Condition kernel for the flux across a boundary of the domain
+ *	\details This file creates a generic boundary condition kernel for the flux of material accross
+ *			a boundary. The flux is based on a velocity vector and is valid
+ *			in all directions and all boundaries of a DG method. Since the DG method's flux boundary
+ *			conditions are essitially the same for input and ouput boundaries, this kernel will check
+ *			the sign of the flux normal to the boundary and determine automattically whether it is
+ *			an output or input boundary, then apply the appropriate conditions.
+ *
+ *			This type of boundary condition for DG kernels applies the true flux boundary condition.
+ *			In true finite volumes or DG methods, there is no Dirichlet	boundary conditions,
+ *			because the solutions are based on fluxes into and out of cells in a domain.
+ *
+ *      Reference: B. Riviere, Discontinous Galerkin methods for solving elliptic and parabolic equations:
+ *                    Theory and Implementation, SIAM, Houston, TX, 2008.
+ *
+ *
  *  \author Austin Ladshaw
  *	\date 11/20/2015
  *	\copyright This kernel was designed and built at the Georgia Institute
