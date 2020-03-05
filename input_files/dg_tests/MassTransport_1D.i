@@ -62,7 +62,6 @@
 		    uy = uy
 		    uz = uz
     [../]
-    #Seems like this kernel is optional for added stability
     [./u_gdiff]
       type = GAnisotropicDiffusion
       variable = dens

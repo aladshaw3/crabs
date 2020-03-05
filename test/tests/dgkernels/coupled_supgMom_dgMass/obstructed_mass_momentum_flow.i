@@ -231,13 +231,13 @@
   l_max_its = 300
 
   start_time = 0.0
-  end_time = 100.0
+  end_time = 0.2
   dtmax = 0.5
 
   [./TimeStepper]
-	type = SolutionTimeAdaptiveDT
-#    type = ConstantDT
-    dt = 0.01
+    #type = SolutionTimeAdaptiveDT
+    type = ConstantDT
+    dt = 0.1
   [../]
 []
 
